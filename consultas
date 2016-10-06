@@ -1,0 +1,101 @@
+1. Dado un título, ¿Cuántas ediciones tiene? ¿En cuántos idiomas?
+
+	a)
+		SELECT	COUNT(ISBN)
+		FROM	EDICION
+		WHERE	titulo_vo="titulodado"
+
+
+	b)
+		SELECT COUNT(p.idiom)
+		FROM (SELECT DISTINCT idioma as idiom
+			  FROM	EDICION
+			  WHERE titulo_vo="titulodado") as P
+
+2. ¿Cuántos libros se han vendido de un autor dado?
+
+	SELECT	COUNT(ID_V)
+	FROM	Escrito_Por, EDICION, Vendido
+	WHERE	id_a="IDdeAutorDado"  (? esto servira?) 
+
+
+3. ¿Cuántos libros de un autor dado se han vendido en oferta?
+
+	SELECT COUNT(P.idv)
+	FROM	(SELECT	ID_V as idv, fecha as date
+			FROM	Escrito_Por, EDICION, Vendido
+			WHERE	id_a="IDdeAutorDado") as P,
+			Vendido as V, EDICION as E, OFERTAS as O
+	WHERE 	P.idv=V.ID_V AND P.date<=O.fin and  O.inicio<=P.date
+
+
+Esto deberia servir si lo anterior sirve
+
+
+4. ¿Cuánto dinero se ha ganado vendiendo libros de un editor dado?
+
+	SELECT 	SUM(P.pp) - SUM(costos) as result
+	FROM	(SELECT	ID_V as idv, Precio_Pagado as pp
+			FROM	Escrito_Por, EDICION, Vendido
+			WHERE	id_a="IDdeAutorDado") as P, EDICION as E,
+			Vendido as V
+	WHERE	P.idv=V.ID_V
+	
+
+5. ¿Cuántos libros han comprado los usuarios fidelizados?
+
+	SELECT COUNT(ID_V)
+	FROM VENTAS
+	WHERE DNI=!NULL
+
+Estamos asumiendo que eliminamos la relacion 10 por ciento y creamos una
+foreign key en Ventas de DNI
+
+
+6. ¿Cuántos usuarios fidelizados han comprado libros en inglés?
+
+	SELECT COUNT(P.d) 
+	FROM	(SELECT DISTINCT DNI as d
+			FROM VENTAS as V, Vendido as N, Edicion as E
+			WHERE V.DNI!=NULL and E.idioma="ingles") as P
+
+
+7. ¿Cuánto dinero se ha ganado vendiendo libros en Francés?
+
+	SELECT SUM(V.Precio_Pagado) - SUM( E.Costos) (Esto funciona???)
+	FROM VENTAS as V, Vendido as N,EDICION as E
+	WHERE V.ID_V= N.ID_V and E.idioma=Costos
+
+
+
+
+8. ¿En que días hubo ofertas de libros de la editorial Adelpi?
+
+	SELECT O.Inicio, O.Fin
+	FROM EDICION as E, OFERTAS as O
+	WHERE	E.editor="Adelpi" AND O.ISBN=E.ISBN
+
+(Es necesaria la segunda condicion?, Estamos asumiendo que Ofertas tiene
+un Foreign key a ISBN para eliminar la relacion tiene)
+
+9. ¿Qué usuarios fidelizados no han comprado nunca libros de bolsillo?
+
+	(SELECT V.DNI
+	FROM VENTAS)
+	
+	EXCEPT
+
+	(SELECT V.DNI
+	FROM VENTAS as V, Vendido as N, EDICION as E
+	WHERE V.DNI=N.DNI and E.tapa="Bolsillo")
+
+
+
+
+
+
+
+
+
+
+
