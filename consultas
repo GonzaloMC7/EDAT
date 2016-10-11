@@ -1,51 +1,53 @@
+LAS FOREIGN KEYS NO SIRVEN PARA NADA
+
 1. Dado un título, ¿Cuántas ediciones tiene? ¿En cuántos idiomas?
 
 	a)
-		SELECT	COUNT(ISBN)
-		FROM	Edicion
-		WHERE	Titulo_vo="titulodado"
+		SELECT	COUNT("ISBN")
+		FROM	"Edicion"
+		WHERE	"Titulo_vo"='Game of thrones'
 
 
 	b)
-		SELECT COUNT(P.idiom)
-		FROM (SELECT DISTINCT idioma as idiom
-			FROM	Edicion
-			WHERE Titulo_vo="titulodado") as P
+	SELECT COUNT(P.idiom)
+	FROM (SELECT DISTINCT "Idioma" as idiom
+      	      FROM	"Edicion"
+              WHERE     "Titulo_vo"='Tokio blues') as P
+
+
 
 2. ¿Cuántos libros se han vendido de un autor dado?
 
-	SELECT	COUNT(V.Id_Venta)
-	FROM	Escrito_Por as S, Vendido as V
-	WHERE   S.Autor_id="IDdeAutorDado" AND V.ISBN=S.ISBN 
-
-(NO SE SI SIRVE, SI NO SIRVE VER POR QUE Y SI SIRVE TAMBIEN)
+	SELECT	COUNT(V."Id_Venta")
+	FROM	"Escrito_Por" as S, "Vendido" as V
+	WHERE   S."Autor_id"='1' AND V."ISBN"=S."ISBN" 
 
 3. ¿Cuántos libros de un autor dado se han vendido en oferta?
 
 
-	SELECT COUNT(P.idv)
-	FROM	(SELECT	VD.Id_Venta as idv, V.Fecha as date
-		 FROM	Escrito_Por as EP , EDICION as E,
-			Vendido as VD, Ventas as V
-		 WHERE	EP.Autor_id="IDdeAutorDado" AND  
-			E.ISBN=VD.ISBN) as P,
-		Vendido as V, EDICION as E, OFERTAS as O
-	WHERE 	P.idv=V.Id_Venta AND E.ISBN=O.ISBN AND 	P.date<=O.Fin AND O.Inicio<=P.date
+	SELECT COUNT(P."idv")
+	FROM	(SELECT	VD."Id_Venta" as idv, V."Fecha" as date
+		FROM	"Escrito_Por" as EP ,"Vendido" as VD, "Ventas" as V
+		WHERE	EP."Autor_id"='1' AND  EP."ISBN"=VD."ISBN" AND VD."Id_Venta"=V."Identificador Venta") as P,
+		"Vendido" as V, "Ofertas" as O
+	WHERE 	P."idv"=V."Id_Venta" AND V."ISBN"=O."ISBN" AND 	P."date"<=O."Fin" AND O."Inicio"<=P."date"
 
 
 
-Esto deberia servir si lo anterior sirve
-o no. quien sabe
+
+TODO FUNCIONA HASTA AQUI
+
+
 
 4. ¿Cuánto dinero se ha ganado vendiendo libros de un editor dado?
 
 
 
 	SELECT 	SUM(P.pp) - SUM(costos) as result
-	FROM	(SELECT	Id_Venta as idv, Precio Pagado as pp
-		 FROM	Escrito_Por, Edicion, Vendido
-		 WHERE	Autor_id="IDdeAutorDado") as P, Ventas as V,
-			Vendido as VD
+	FROM	(SELECT	VD."Id_Venta" as idv, V."Precio Pagado" as pp
+		 FROM	"Escrito_Por" as EP, "Vendido" as VD, "Ventas" as V
+		 WHERE	EP."Autor_id"='1' AND EP."ISBN"=VD."ISBN" AND VD."Id_Venta"=V."Identificador Venta" ) as P,
+ 		Ventas as V, Vendido as VD
 	WHERE	P.idv=VD.Id_Venta
 	
 ESTO NO CREO QUE FUNCIONE EN CASO DE QUE NO FUNCIONE CREA P.pp y V.costos
