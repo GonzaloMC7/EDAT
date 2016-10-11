@@ -1,6 +1,6 @@
-1	10	20	Pepe	Dura	Ingles	Game of thrones			Game of thrones
-2	7	10	Juan	Blanda	Espanol	Juego de tronos			Game of thrones
-3	3	5	Pepe	Blanda	Espanol	Underground				Underground
-4	6	7	Jose	Dura	Espanol	Tokio blues				Tokio blues
-5	2	10	Genio	Blanda	Espanol	Farenheit 451			Farenheit451
-6	3	8	Genio	Dura	Espanol	El fin de la eternidad	El fin de la eternidad
+1,10,20,SM,Dura,Ingles,Game of thrones,Game of thrones
+2,7,10,Anaya,Blanda,Espanol,Juego de tronos,Game of thrones
+3,3,5,SM,Blanda,Espanol,Underground,Underground
+4,6,7,Edebe,Dura,Espanol,Tokio blues,Tokio blues
+5,2,10,Planeta,Blanda,Espanol,Farenheit 451,Farenheit 451
+6,3,8,Planeta,Dura,Espanol,El fin de la eternidad,El fin de la eternidad
