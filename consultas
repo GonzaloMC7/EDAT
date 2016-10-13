@@ -35,7 +35,6 @@ LAS FOREIGN KEYS NO SIRVEN PARA NADA
 
 
 
-TODO FUNCIONA HASTA AQUI
 
 
 
@@ -43,52 +42,59 @@ TODO FUNCIONA HASTA AQUI
 
 
 
-	SELECT 	SUM(P.pp) - SUM(costos) as result
+	SELECT 	SUM(P."pp")-SUM(E."Costos")
 	FROM	(SELECT	VD."Id_Venta" as idv, V."Precio Pagado" as pp
 		 FROM	"Escrito_Por" as EP, "Vendido" as VD, "Ventas" as V
 		 WHERE	EP."Autor_id"='1' AND EP."ISBN"=VD."ISBN" AND VD."Id_Venta"=V."Identificador Venta" ) as P,
- 		Ventas as V, Vendido as VD
-	WHERE	P.idv=VD.Id_Venta
+ 		 "Vendido" as VD, "Edicion" as E
+	WHERE	P."idv"=VD."Id_Venta" and VD."ISBN"=E."ISBN"
+	GROUP BY E."ISBN"
 	
-ESTO NO CREO QUE FUNCIONE EN CASO DE QUE NO FUNCIONE CREA P.pp y V.costos
-y lugo suma y bla bla
 
 
 5. ¿Cuántos libros han comprado los usuarios fidelizados?
 
-	SELECT COUNT(ID_V)
-	FROM VENTAS
-	WHERE DNI=!NULL
+	SELECT COUNT("Identificador Venta")
+	FROM "Ventas"
+	WHERE "DNI" IS NOT NULL
 
-Estamos asumiendo que eliminamos la relacion 10 por ciento y creamos una
-foreign key en Ventas de DNI
+
 
 
 6. ¿Cuántos usuarios fidelizados han comprado libros en inglés?
 
-	SELECT COUNT(P.d) 
-	FROM	(SELECT DISTINCT DNI as d
-			FROM VENTAS as V, Vendido as N, Edicion as E
-			WHERE V.DNI!=NULL and E.idioma="ingles") as P
+	SELECT COUNT(P."d") 
+	FROM	(SELECT DISTINCT "DNI" as d
+			FROM "Ventas" as V, "Vendido" as N, "Edicion" as E
+			WHERE V."DNI" IS NOT NULL AND  E."Idioma"='Ingles'
+			AND V."Identificador Venta"=N."Id_Venta" 
+			AND N."ISBN"=E."ISBN") as P
+
 
 
 7. ¿Cuánto dinero se ha ganado vendiendo libros en Francés?
 
-	SELECT SUM(V.Precio_Pagado) - SUM( E.Costos) (Esto funciona???)
-	FROM VENTAS as V, Vendido as N,EDICION as E
-	WHERE V.ID_V= N.ID_V and E.idioma=Costos
+/*Probamos con ingles porque no tenemos libros en Frances*/
+/*En realidad tampoco tenemos en ingles vendidos pero agregue un par para probar*/
+/*Un par de ventas*/
 
+SELECT	SUM(V."Precio Pagado")-SUM(E."Costos")
+FROM "Ventas" as V, "Vendido" as VD, "Edicion" as E
+WHERE E."ISBN"=VD."ISBN" AND VD."Id_Venta"=V."Identificador Venta"
+      AND E."Idioma"='Espanol'
+GROUP BY E."Idioma"
 
 
 
 8. ¿En que días hubo ofertas de libros de la editorial Adelpi?
+ 
+/*PROBAMOS CON EDITORIALES PLANETA SM ANAYA EDEBE, no tenemos adelpi*/
 
-	SELECT O.Inicio, O.Fin
-	FROM EDICION as E, OFERTAS as O
-	WHERE	E.editor="Adelpi" AND O.ISBN=E.ISBN
+	SELECT O."Inicio", O."Fin"
+	FROM "Edicion" as E, "Ofertas" as O
+	WHERE	E."Editor"='Adelpi' AND O."ISBN"=E."ISBN"
 
-(Es necesaria la segunda condicion?, Estamos asumiendo que Ofertas tiene
-un Foreign key a ISBN para eliminar la relacion tiene)
+SOLO FALTA PROBAR EL EJERCICIO 9
 
 9. ¿Qué usuarios fidelizados no han comprado nunca libros de bolsillo?
 
