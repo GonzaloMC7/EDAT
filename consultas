@@ -94,20 +94,19 @@ GROUP BY E."Idioma"
 	FROM "Edicion" as E, "Ofertas" as O
 	WHERE	E."Editor"='Adelpi' AND O."ISBN"=E."ISBN"
 
-SOLO FALTA PROBAR EL EJERCICIO 9
 
 9. ¿Qué usuarios fidelizados no han comprado nunca libros de bolsillo?
+/*Usaremos libros de tipo blanda y dura por los valores que tenemos en */
+/*la base de datos*/
 
-	(SELECT V.DNI
-	FROM VENTAS)
-	
+	(SELECT F."DNI"
+	FROM "Fidelizado" as F
+	WHERE F."DNI" IS NOT NULL)
 	EXCEPT
-
-	(SELECT V.DNI
-	FROM VENTAS as V, Vendido as N, EDICION as E
-	WHERE V.DNI=N.DNI and E.tapa="Bolsillo")
-
-
+	(SELECT V."DNI"
+	FROM "Ventas" as V, "Vendido" as VD, "Edicion" as E
+	WHERE V."Identificador Venta" =VD."Id_Venta"
+	      AND VD."ISBN"=E."ISBN" AND E."Tipo"='Blanda')
 
 
 
