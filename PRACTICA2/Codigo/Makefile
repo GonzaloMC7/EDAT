@@ -1,13 +1,15 @@
-all: addUsr
+FLAGS= -pedantic -Wall -Wextra -ansi
 
-addUsr: addUsr.o  odbc.o
-	gcc -o addUsr  addUsr.o odbc.o -lodbc
+all: usuario
 
-addUsr.o: addUsr.c odbc.h
-	gcc -c -pedantic -Wall -Wextra -ansi  addUsr.c -lodbc
+usuario: usuario.o  odbc.o
+	gcc -o usuario  usuario.o odbc.o -lodbc
+
+usuario.o: usuario.c odbc.h
+	gcc -c $(FLAGS)   usuario.c -lodbc
 
 odbc.o: odbc.c odbc.h
-	gcc  -c -pedantic -Wall -Wextra -ansi odbc.c -lodbc
+	gcc  -c $(FLAGS) odbc.c -lodbc
 
 clean:
 	rm *.o

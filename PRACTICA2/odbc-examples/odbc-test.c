@@ -20,11 +20,12 @@ int main(void) {
     /* Allocate a connection handle */
     SQLAllocHandle(SQL_HANDLE_DBC, env, &dbc);
     /* Connect to the DSN mydsn */
-    ret = SQLDriverConnect(dbc, NULL, (SQLCHAR*) "DRIVER=PostgreSQL;DATABASE=test01;SERVER=localhost;PORT=5432;UID=postgres;PWD=;", SQL_NTS,
+    ret = SQLDriverConnect(dbc, NULL, (SQLCHAR*) "DRIVER=PostgreSQL ANSI;DATABASE=PRACT_2;SERVER=localhost;PORT=5432;UID=alumnodb;PWD=alumnodb;", SQL_NTS,
                            outstr, sizeof(outstr), &outstrlen,
                            SQL_DRIVER_NOPROMPT);
 
     if (SQL_SUCCEEDED(ret)) {
+
         printf("Connected\n");
         printf("Returned connection string was:\n\t%s\n", outstr);
         if (ret == SQL_SUCCESS_WITH_INFO) {
