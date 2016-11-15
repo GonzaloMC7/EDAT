@@ -15,8 +15,8 @@ int main(int argc, char **argv){
   char aux, buff[1000],name[100],scrname[100], scr[100];
 
 
-  if(argc<2){
-    printf("Error en el paso de argumentos\n");
+  if(argc<3){
+    printf("Error en el paso de argumentos, faltan argumentos.\n");
     return 0;
   }
   /*First we read the character +/- and the Screen_name*/
