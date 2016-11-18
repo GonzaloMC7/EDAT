@@ -15,17 +15,23 @@ int main(int argc, char **argv){
   SQLSMALLINT outstrlen;
   SQLHSTMT stmt;
   int num;/*numero de isbns*/
-  int boolean, descuento;
+  int boolean, descuento,i,aux;
+  char buff[1000];
 
   /*REVISAMOS LOS DATOS DE ENTRADA*/
   if(argc<4){
-    printf("ERROR, faltan argumentos.\n")
+    printf("ERROR, faltan argumentos.\n");
     return 0;
   }
 
-  descuento=argv[1];
+  descuento=atoi(argv[1]);
   num=argc-4;/*NUmero de isbsns sera el numero de argumentos menos los 4 primeros argumentos*/
-  /*FALTAN POR REVISAR que la fecha tiene sentido*/
+  /*Comprobamos que las fechas son coherentes, asumimos que nos las pasan bien*/
+  /*con el formato anyo-mes-dia*/
+  if(strcmp(argv[2],argv[3])>0){
+    printf("ERROR, las fechas introducidas son incorrectas.\n");
+    return 0;
+  }
 
 
 
@@ -55,21 +61,52 @@ int main(int argc, char **argv){
     return 0;
   }
 
-  /*Guardamos memoria para guardar la tabla en stmt*/
-  ret=SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
-  if(!SQL_SUCCEEDED(ret)){
-    printf("Error allocating statement\n");
-    SQLDisconnect(dbc);
-    SQLFreeHandle(SQL_HANDLE_DBC, dbc);
-    SQLFreeHandle(SQL_HANDLE_ENV, env);
-    return 0;
-  }
+
 
 
   /*REVISEMOS QUE TODOS LOS ISBNS ESTAN EN NUESTRA BASE DE DATOS*/
+  strcpy(buff,"select \"ISBN\" from public.\"Edicion\" where \"ISBN\"=?");
+  boolean=TRUE;
+  for(i=4;i<argc && boolean==TRUE;i++){
+    /*asignamos el isbn a una variable auxiliar*/
+    aux=atoi(argv[i]);
 
+    /*Guardamos memoria para guardar la tabla en stmt*/
+    ret=SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
+    if(!SQL_SUCCEEDED(ret)){
+      printf("Error allocating statement\n");
+      SQLDisconnect(dbc);
+      SQLFreeHandle(SQL_HANDLE_DBC, dbc);
+      SQLFreeHandle(SQL_HANDLE_ENV, env);
+      return 0;
+    }
 
+    /*preparamos la consulta*/
+    SQLPrepare(stmt,(SQLCHAR*)buff,SQL_NTS);
+    SQLBindParameter(stmt,1,SQL_PARAM_INPUT,SQL_C_SLONG,SQL_INTEGER,0,0,&aux,0,NULL);
+    SQLExecute(stmt);
 
+    /*hacemos un fetch*/
+    ret=SQLFetch(stmt);
+    /*si el fetch falla, el isbn no esta en la tabla*/
+    if(!SQL_SUCCEEDED(ret)){
+      boolean=FALSE;
+    }
+    /*liberamos la tabla para utilizar despues*/
+    SQLFreeHandle(SQL_HANDLE_STMT, stmt);
+  }
+
+  /*si algun isbn no esta en la tabla, sal del programa*/
+  if(boolean==FALSE){
+    /*Desconectamos y liberamos*/
+    SQLDisconnect(dbc);
+    SQLFreeHandle(SQL_HANDLE_DBC, dbc);
+    SQLFreeHandle(SQL_HANDLE_ENV, env);
+    printf("ERROR, algun isbn no esta en nuestra base de datos.\n");
+    return 0;
+  }
+
+	/*CODIGO PARA INSERTAR LA OFERTA , TENER EN CUENTA TODO LO NECESASRIO Y LAS MULTIPLES TABLAS*/
 
 
   /*Desconectamos y liberamos*/
