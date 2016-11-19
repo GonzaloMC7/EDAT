@@ -15,7 +15,6 @@ int main(int argc, char **argv){
   SQLSMALLINT outstrlen;
   SQLHSTMT stmt;
   int boolean, descuento,i,aux;
-  char inicio[100],fin[100];
   char buff[1000];
 
   /*REVISAMOS LOS DATOS DE ENTRADA*/
@@ -42,7 +41,7 @@ int main(int argc, char **argv){
   /* Allocate a connection handle */
   SQLAllocHandle(SQL_HANDLE_DBC, env, &dbc);
   /* Connect to the DSN mydsn */
-  ret = SQLDriverConnect(dbc, NULL, (SQLCHAR*) "DRIVER=PostgreSQL ANSI;DATABASE=practica2;SERVER=localhost;PORT=5432;UID=andressp05;PWD=salsita;", SQL_NTS,
+  ret = SQLDriverConnect(dbc, NULL, (SQLCHAR*) "DRIVER=PostgreSQL ANSI;DATABASE=PRACT_2;SERVER=localhost;PORT=5432;UID=alumnodb;PWD=alumnodb;", SQL_NTS,
                          outstr, sizeof(outstr), &outstrlen,
                          SQL_DRIVER_NOPROMPT);
 
@@ -105,42 +104,55 @@ int main(int argc, char **argv){
     return 0;
   }
 
+
+
+  /*HACEMOS LA CONSULTA INSERT INTO*/
  	/*Creamos la consulta*/
  	strcpy(buff, "insert into public.\"Ofertas\" (\"Inicio\", \"Fin\",\"descuento\",\"isbn\") values (?,?,?,?)");
- 	SQLPrepare(stmt,(SQLCHAR*)buff,SQL_NTS);
-    for(i=4;i<argc; i++){
-    	/*Guardamos memoria para guardar la tabla en stmt*/
-    	ret=SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
-    	if(!SQL_SUCCEEDED(ret)){
-      		printf("Error allocating statement\n");
-      		SQLDisconnect(dbc);
-      		SQLFreeHandle(SQL_HANDLE_DBC, dbc);
-      		SQLFreeHandle(SQL_HANDLE_ENV, env);
+ 	for(i=4;i<argc; i++){
+    /*Guardamos memoria para guardar la tabla en stmt*/
+    ret=SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
+    if(!SQL_SUCCEEDED(ret)){
+		    printf("Error allocating statement\n");
+      	SQLDisconnect(dbc);
+      	SQLFreeHandle(SQL_HANDLE_DBC, dbc);
+      	SQLFreeHandle(SQL_HANDLE_ENV, env);
     		return 0;
-    	}
-        
-        aux=atoi(argv[i]);
-        SQLBindParameter(stmt,1,SQL_PARAM_INPUT,SQL_C_CHAR,SQL_CHAR,0,0,inicio,0,NULL);
-      	SQLBindParameter(stmt,2,SQL_PARAM_INPUT,SQL_C_CHAR,SQL_CHAR,0,0,fin,0,NULL);
-       	SQLBindParameter(stmt,3,SQL_PARAM_INPUT,SQL_C_SLONG,SQL_INTEGER,0,0,&descuento,0,NULL);        	
-       	SQLBindParameter(stmt,i,SQL_PARAM_INPUT,SQL_C_SLONG,SQL_INTEGER,0,0,&aux,0,NULL);
-		
+    }
+
+    aux=atoi(argv[i]);
+    SQLPrepare(stmt,(SQLCHAR*)buff,SQL_NTS);
+    SQLBindParameter(stmt,1,SQL_PARAM_INPUT,SQL_C_CHAR,SQL_CHAR,0,0,argv[2],0,NULL);
+    SQLBindParameter(stmt,2,SQL_PARAM_INPUT,SQL_C_CHAR,SQL_CHAR,0,0,argv[3],0,NULL);
+    SQLBindParameter(stmt,3,SQL_PARAM_INPUT,SQL_C_SLONG,SQL_INTEGER,0,0,&descuento,0,NULL);
+    SQLBindParameter(stmt,4,SQL_PARAM_INPUT,SQL_C_SLONG,SQL_INTEGER,0,0,&aux,0,NULL);
+
 		/*Realizamos la consulta y la guardamos en stmt*/
-        ret=SQLExecute(stmt);
-        if(!SQL_SUCCEEDED(ret)){
-        	printf("Error en la ejecucion de la consulta insert into\n");
-            printf("No se ha podido agregar la oferta.\n");
-            SQLDisconnect(dbc);
-            SQLFreeHandle(SQL_HANDLE_STMT, stmt);
-            SQLFreeHandle(SQL_HANDLE_DBC, dbc);
-            SQLFreeHandle(SQL_HANDLE_ENV, env);
-            return 0;
-        }
-        else{
-            printf("La oferta ha sido agregado con exito\n");
-            /*Liberamos la tabla*/
-            SQLFreeHandle(SQL_HANDLE_STMT, stmt);
-        }
+    ret=SQLExecute(stmt);
+    if(!SQL_SUCCEEDED(ret)){
+      printf("Error en la ejecucion de la consulta insert into\n");
+      printf("No se ha podido agregar alguna oferta.\n");
+      SQLDisconnect(dbc);
+      SQLFreeHandle(SQL_HANDLE_STMT, stmt);
+      SQLFreeHandle(SQL_HANDLE_DBC, dbc);
+      SQLFreeHandle(SQL_HANDLE_ENV, env);
+      SQLFreeHandle(SQL_HANDLE_STMT, stmt);
+      return 0;
+    }else{
+      /*La oferta se ha ejecutado con exito*/
+      /*Liberamos la tabla*/
+      SQLFreeHandle(SQL_HANDLE_STMT, stmt);
+    }
+    printf("Todas las ofertas han sido agregadas con exito\n");
+
+
+    /*Desconectamos de la base y salimos*/
+    SQLDisconnect(dbc);
+    SQLFreeHandle(SQL_HANDLE_STMT, stmt);
+    SQLFreeHandle(SQL_HANDLE_DBC, dbc);
+    SQLFreeHandle(SQL_HANDLE_ENV, env);
+    SQLFreeHandle(SQL_HANDLE_STMT, stmt);
+    return 0;
     }
 
   /*Desconectamos y liberamos*/
