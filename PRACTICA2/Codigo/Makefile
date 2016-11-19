@@ -1,12 +1,18 @@
 FLAGS= -pedantic -Wall -Wextra -ansi
 
-all: usuario oferta
+all: usuario oferta compra clean
 
 usuario: usuario.o  odbc.o
 	gcc -o usuario  usuario.o odbc.o -lodbc
 
 oferta: oferta.o odbc.o
 	gcc -o  oferta oferta.o odbc.o -lodbc
+
+compra: compra.o odbc.o
+	gcc -o compra compra.o odbc.o -lodbc
+
+compra.o: compra.c odbc.h
+	gcc -c $(FLAGS) compra.c -lodbc
 
 usuario.o: usuario.c odbc.h
 	gcc -c $(FLAGS)   usuario.c -lodbc

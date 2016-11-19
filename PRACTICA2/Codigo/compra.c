@@ -59,11 +59,11 @@ char *fecha(){
   mes=tm.tm_mon+1;
   dia=tm.tm_mday;
 
-  itoa(anio,fecha,10);
+  itoa(anio,fecha);
   fecha[4]='-';
-  itoa(mes,fecha+5,10);
+  itoa(mes,fecha+5);
   fecha[7]='-';
-  itoa(dia,fecha+8,10);
+  itoa(dia,fecha+8);
 
   return fecha;
 }
@@ -80,8 +80,9 @@ int main(int argc, char **argv){
   SQLCHAR outstr[1024];
   SQLSMALLINT outstrlen;
   SQLHSTMT stmt;
-  int descuento,precio,total,boolean,aux;
-  char buff[1000],scrname[100],titulo[100],*actual;
+  int descuento,boolean,aux,dni,id_oferta,i;
+  float precio,total=0;
+  char buff[1000],scrname[100],titulo[100],*actual,ET[2]="E";
 
   /*Revisamos cosas basicas de los argumentos*/
   if(argc<3){
@@ -118,6 +119,15 @@ int main(int argc, char **argv){
   }
 
 
+  /*Guardamos memoria para guardar la tabla en stmt*/
+  ret=SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
+  if(!SQL_SUCCEEDED(ret)){
+    printf("Error allocating statement\n");
+    SQLDisconnect(dbc);
+    SQLFreeHandle(SQL_HANDLE_DBC, dbc);
+    SQLFreeHandle(SQL_HANDLE_ENV, env);
+    return 0;
+  }
 
   /*Revisemos que el screen_name esta en la tabla*/
   /*Creamos un string con la consulta*/
@@ -217,8 +227,9 @@ int main(int argc, char **argv){
       SQLPrepare(stmt,(SQLCHAR*)buff,SQL_NTS);
       SQLBindParameter(stmt,1,SQL_PARAM_INPUT,SQL_C_SLONG,SQL_INTEGER,0,0,&aux,0,NULL);
       SQLBindCol(stmt,1,SQL_C_CHAR,titulo,sizeof(titulo),NULL);
+      SQLExecute(stmt);
       /*Hacemos el fetch para tener el resultado de la consulta en titulo*/
-      SQLFetch(stmt);
+      ret=SQLFetch(stmt);
       /*liberamos la tabla para utilizar despues*/
       SQLFreeHandle(SQL_HANDLE_STMT, stmt);
 
@@ -236,7 +247,8 @@ int main(int argc, char **argv){
       /*preparamos la consulta*/
       SQLPrepare(stmt,(SQLCHAR*)buff,SQL_NTS);
       SQLBindParameter(stmt,1,SQL_PARAM_INPUT,SQL_C_SLONG,SQL_INTEGER,0,0,&aux,0,NULL);
-      SQLBindCol(stmt,1,SQL_C_SLONG,precio,sizeof(precio),NULL);
+      SQLBindCol(stmt,1,SQL_C_FLOAT,&precio,sizeof(precio),NULL);
+      SQLExecute(stmt);
       /*Hacemos el fetch para tener el resultado de la consulta en precio*/
       SQLFetch(stmt);
       /*liberamos la tabla para utilizar despues*/
@@ -254,10 +266,126 @@ int main(int argc, char **argv){
         return 0;
       }
       actual=fecha();
+      strcpy(buff,"select \"descuento\" from public.\"Ofertas\" where \"ISBN\"=? and \"Inicio\"<=? and ?<=\"Fin\"");
+      /*preparamos consulta*/
+      SQLPrepare(stmt,(SQLCHAR*)buff,SQL_NTS);
+      SQLBindParameter(stmt,1,SQL_PARAM_INPUT,SQL_C_SLONG,SQL_INTEGER,0,0,&aux,0,NULL);
+      SQLBindParameter(stmt,2,SQL_PARAM_INPUT,SQL_C_CHAR,SQL_CHAR,0,0,actual,0,NULL);
+      SQLBindParameter(stmt,3,SQL_PARAM_INPUT,SQL_C_CHAR,SQL_CHAR,0,0,actual,0,NULL);
+      SQLBindCol(stmt,1,SQL_C_SLONG,&descuento,sizeof(descuento),NULL);
+      SQLExecute(stmt);
+      /*Hacemos el fetch para tener el resultado de la consulta en descuento*/
+      ret=SQLFetch(stmt);
+      /*liberamos la tabla para utilizar despues*/
+      SQLFreeHandle(SQL_HANDLE_STMT, stmt);
+      if(!SQL_SUCCEEDED(ret)){
+        descuento=-1;/*Si la consulta fallo, fijamos que no hay oferta*/
+      }
 
-
+      if(descuento!=-1){
+        total=total+precio-precio*((float)descuento/100);
+        printf("El libro %s tiene un precio de %.2f euros.\n",titulo,precio-precio*((float)descuento/100));
+      }else{
+        total=total+precio;
+        printf("El libro %s tiene un precio de %.2f euros.\n",titulo,precio);
+      }
   }
 
 
+
+  /*Guardamos memoria para guardar la tabla en stmt*/
+  ret=SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
+  if(!SQL_SUCCEEDED(ret)){
+    printf("Error allocating statement\n");
+    SQLDisconnect(dbc);
+    SQLFreeHandle(SQL_HANDLE_DBC, dbc);
+    SQLFreeHandle(SQL_HANDLE_ENV, env);
+    return 0;
+  }
+  /*Sacaremos el DNI del scrname para poder insertar luego la venta*/
+  strcpy(buff,"select \"Dni\" from public.\"Fidelizado\" where \"Screen_name\"=?");
+  SQLPrepare(stmt,(SQLCHAR*)buff,SQL_NTS);
+  SQLBindParameter(stmt,1,SQL_PARAM_INPUT,SQL_C_CHAR,SQL_CHAR,0,0,scrname,0,NULL);
+  SQLBindCol(stmt,1,SQL_C_SLONG,&dni,sizeof(dni),NULL);
+  SQLExecute(stmt);
+  /*Hacemos el fetch para tener el resultado de la consulta en descuento*/
+  SQLFetch(stmt);
+  /*liberamos la tabla para utilizar despues*/
+  SQLFreeHandle(SQL_HANDLE_STMT, stmt);
+
+
+
+  /*Guardamos memoria para guardar la tabla en stmt*/
+  ret=SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
+  if(!SQL_SUCCEEDED(ret)){
+    printf("Error allocating statement\n");
+    SQLDisconnect(dbc);
+    SQLFreeHandle(SQL_HANDLE_DBC, dbc);
+    SQLFreeHandle(SQL_HANDLE_ENV, env);
+    return 0;
+  }
+  /*Ahora introducimos la venta a la tabla VENTAS*/
+  strcpy(buff,"insert into public.\"Ventas\"(\"Precio_Total\", \"Fecha\", \"Efectivo/Tarjeta\", \"DNI\") values (?, ?, ?, ?)");
+  SQLPrepare(stmt,(SQLCHAR*)buff,SQL_NTS);
+  SQLBindParameter(stmt,1,SQL_PARAM_INPUT,SQL_C_FLOAT,SQL_REAL,0,0,&total,0,NULL);
+  SQLBindParameter(stmt,2,SQL_PARAM_INPUT,SQL_C_CHAR,SQL_CHAR,0,0,actual,0,NULL);
+  SQLBindParameter(stmt,3,SQL_PARAM_INPUT,SQL_C_CHAR,SQL_CHAR,0,0,ET,0,NULL);
+  SQLBindParameter(stmt,4,SQL_PARAM_INPUT,SQL_C_SLONG,SQL_INTEGER,0,0,&dni,0,NULL);
+  ret=SQLExecute(stmt);
+  SQLFreeHandle(SQL_HANDLE_STMT,stmt);
+  if(SQL_SUCCEEDED(ret))
+    printf("Venta introducida con exito.\n");
+
+  /*Guardamos memoria para guardar la tabla en stmt*/
+  ret=SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
+  if(!SQL_SUCCEEDED(ret)){
+    printf("Error allocating statement\n");
+    SQLDisconnect(dbc);
+    SQLFreeHandle(SQL_HANDLE_DBC, dbc);
+    SQLFreeHandle(SQL_HANDLE_ENV, env);
+    return 0;
+  }
+  /*Ahora introducimos todas las relaciones entre los isbns y la venta*/
+  /*Primero necesitamos el id_oferta de la venta*/
+  /*ASUMIMOS QUE UNA VENTA DEL MISMO PRECIO, FECHA Y DNI es unica*/
+  strcpy(buff,"select \"id_oferta\" from public.\"Ventas\" where \"Precio_Total\"=? and \"Fecha\"=? and \"DNI\"=?");
+  SQLPrepare(stmt,(SQLCHAR*)buff,SQL_NTS);
+  SQLBindParameter(stmt,1,SQL_PARAM_INPUT,SQL_C_FLOAT,SQL_REAL,0,0,&total,0,NULL);
+  SQLBindParameter(stmt,2,SQL_PARAM_INPUT,SQL_C_CHAR,SQL_CHAR,0,0,actual,0,NULL);
+  SQLBindParameter(stmt,3,SQL_PARAM_INPUT,SQL_C_SLONG,SQL_INTEGER,0,0,&dni,0,NULL);
+  SQLBindCol(stmt,1,SQL_C_SLONG,&id_oferta,sizeof(id_oferta),NULL);
+  SQLExecute(stmt);
+  /*Se ejecuta la consulta y se guarda en idoferta el id de la venta*/
+  SQLFetch(stmt);
+  SQLFreeHandle(SQL_HANDLE_STMT,stmt);
+  
+
+  /*Ahora hacemos un bucle introduciendo todas las relaciones*/
+  strcpy(buff,"insert into public.\"Vendido\"(\"ISBN\", \"Id_Venta\") values (?, ?)");
+  for(i=2;i<argc;i++){
+    aux=atoi(argv[i]);
+    /*Guardamos memoria para guardar la tabla en stmt*/
+    ret=SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
+    if(!SQL_SUCCEEDED(ret)){
+      printf("Error allocating statement\n");
+      SQLDisconnect(dbc);
+      SQLFreeHandle(SQL_HANDLE_DBC, dbc);
+      SQLFreeHandle(SQL_HANDLE_ENV, env);
+      return 0;
+    }
+    SQLPrepare(stmt,(SQLCHAR*)buff,SQL_NTS);
+    SQLBindParameter(stmt,1,SQL_PARAM_INPUT,SQL_C_SLONG,SQL_INTEGER,0,0,&aux,0,NULL);
+    SQLBindParameter(stmt,2,SQL_PARAM_INPUT,SQL_C_SLONG,SQL_INTEGER,0,0,&id_oferta,0,NULL);
+    /*Se ejecuta la consulta */
+    ret=SQLExecute(stmt);
+    SQLFreeHandle(SQL_HANDLE_STMT,stmt);
+  }
+  if(SQL_SUCCEEDED(ret))
+    printf("Relaciones introducidas con exito.\n");
+
   free(actual);
+  SQLDisconnect(dbc);
+  SQLFreeHandle(SQL_HANDLE_DBC, dbc);
+  SQLFreeHandle(SQL_HANDLE_ENV, env);
+  return 0;
 }

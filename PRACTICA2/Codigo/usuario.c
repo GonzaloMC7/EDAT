@@ -181,9 +181,9 @@ int main(int argc, char **argv){
 
 
   /* disconnect from database and free up allocated handles */
-  SQLDisconnect(dbc);
   SQLFreeHandle(SQL_HANDLE_DBC, dbc);
   SQLFreeHandle(SQL_HANDLE_ENV, env);
+  SQLDisconnect(dbc);
 
 
 
