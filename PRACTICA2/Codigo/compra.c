@@ -361,7 +361,7 @@ int main(int argc, char **argv){
 
 
   /*Ahora hacemos un bucle introduciendo todas las relaciones*/
-  strcpy(buff,"insert into public.\"Vendido\"(\"ISBN\", \"Id_Venta\") values (?, ?)");
+  strcpy(buff,"insert into public.\"Vendido\"(\"ISBN\", \"id_venta\") values (?, ?)");
   for(i=2;i<argc;i++){
     aux=atoi(argv[i]);
     /*Guardamos memoria para guardar la tabla en stmt*/
