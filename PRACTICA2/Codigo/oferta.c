@@ -143,18 +143,9 @@ int main(int argc, char **argv){
       /*Liberamos la tabla*/
       SQLFreeHandle(SQL_HANDLE_STMT, stmt);
     }
-    printf("Todas las ofertas han sido agregadas con exito\n");
+  }
 
-
-    /*Desconectamos de la base y salimos*/
-    SQLDisconnect(dbc);
-    SQLFreeHandle(SQL_HANDLE_STMT, stmt);
-    SQLFreeHandle(SQL_HANDLE_DBC, dbc);
-    SQLFreeHandle(SQL_HANDLE_ENV, env);
-    SQLFreeHandle(SQL_HANDLE_STMT, stmt);
-    return 0;
-    }
-
+  printf("Todas las ofertas han sido agregadas con exito\n");
   /*Desconectamos y liberamos*/
   SQLDisconnect(dbc);
   SQLFreeHandle(SQL_HANDLE_DBC, dbc);

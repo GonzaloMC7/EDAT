@@ -3,15 +3,32 @@
 #include <string.h>
 #include <sql.h>
 #include <sqlext.h>
+#include <time.h>
 #include "odbc.h"
 #define TRUE 1
 #define FALSE 0
 
 /*
-  Funcion que devuelve un string con el siguiente formato
+  Funcion que devuelve un string con el siguiente formato 'AAAA-MM-DD'
+  donde AAAA es el anio actual, MM el mes actual y DD el dia actual
 */
 char *fecha(){
-  
+  char *fecha[11];
+  int anio,mes,dia;
+  time_t t=time(NULL);
+	struct tm tm=*localtime(&t);
+
+  anio=tm.tm_year+1900;
+  mes=tm.tm_mon+1;
+  dia=tm.tm_mday;
+
+  itoa(anio,fecha,10);
+  fecha[4]='-';
+  itoa(mes,fecha+5,10);
+  fecha[7]='-';
+  itoa(dia,fecha+8,10);
+
+  return fecha;
 
 }
 
@@ -195,7 +212,7 @@ int main(int argc, char **argv){
         SQLFreeHandle(SQL_HANDLE_ENV, env);
         return 0;
       }
-
+      actual=fecha();
 
 
   }
