@@ -108,7 +108,7 @@ int main(int argc, char **argv){
 
   /*HACEMOS LA CONSULTA INSERT INTO*/
  	/*Creamos la consulta*/
- 	strcpy(buff, "insert into public.\"Ofertas\" (\"Inicio\", \"Fin\",\"descuento\",\"isbn\") values (?,?,?,?)");
+ 	strcpy(buff, "insert into public.\"Ofertas\" (\"Inicio\", \"Fin\",\"descuento\",\"ISBN\") values (?,?,?,?)");
  	for(i=4;i<argc; i++){
     /*Guardamos memoria para guardar la tabla en stmt*/
     ret=SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
@@ -136,7 +136,6 @@ int main(int argc, char **argv){
       SQLFreeHandle(SQL_HANDLE_STMT, stmt);
       SQLFreeHandle(SQL_HANDLE_DBC, dbc);
       SQLFreeHandle(SQL_HANDLE_ENV, env);
-      SQLFreeHandle(SQL_HANDLE_STMT, stmt);
       return 0;
     }else{
       /*La oferta se ha ejecutado con exito*/

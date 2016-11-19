@@ -8,16 +8,53 @@
 #define TRUE 1
 #define FALSE 0
 
+
+
+/*FUNCIONES AUXILIARES UTILIZADAS*/
+ /* reverse:  reverse string s in place */
+ void reverse(char s[])
+ {
+     int i, j;
+     char c;
+
+     for (i = 0, j = strlen(s)-1; i<j; i++, j--) {
+         c = s[i];
+         s[i] = s[j];
+         s[j] = c;
+     }
+ }
+
+
+ /* itoa:  convert n to characters in s */
+ void itoa(int n, char *s)
+ {
+     int i, sign;
+
+     if ((sign = n) < 0)  /* record sign */
+         n = -n;          /* make n positive */
+     i = 0;
+     do {       /* generate digits in reverse order */
+         s[i++] = n % 10 + '0';   /* get next digit */
+     } while ((n /= 10) > 0);     /* delete it */
+     if (sign < 0)
+         s[i++] = '-';
+     s[i] = '\0';
+     reverse(s);
+ }
+
 /*
   Funcion que devuelve un string con el siguiente formato 'AAAA-MM-DD'
   donde AAAA es el anio actual, MM el mes actual y DD el dia actual
+  Returns:
+    La string que se devuelve DEBE SER LIBERADA FUERA DE ESTA FUNCION
 */
 char *fecha(){
-  char *fecha[11];
+  char *fecha;
   int anio,mes,dia;
   time_t t=time(NULL);
 	struct tm tm=*localtime(&t);
 
+  fecha=(char *)malloc(sizeof(char)*11);
   anio=tm.tm_year+1900;
   mes=tm.tm_mon+1;
   dia=tm.tm_mday;
@@ -29,8 +66,12 @@ char *fecha(){
   itoa(dia,fecha+8,10);
 
   return fecha;
-
 }
+/*FIN DE FUNCIONES AUXILIARES*/
+
+
+
+
 
 int main(int argc, char **argv){
   SQLHENV env;
@@ -40,7 +81,7 @@ int main(int argc, char **argv){
   SQLSMALLINT outstrlen;
   SQLHSTMT stmt;
   int descuento,precio,total,boolean,aux;
-  char buff[1000],scrname[100],titulo[100],actual[11];
+  char buff[1000],scrname[100],titulo[100],*actual;
 
   /*Revisamos cosas basicas de los argumentos*/
   if(argc<3){
@@ -218,4 +259,5 @@ int main(int argc, char **argv){
   }
 
 
+  free(actual);
 }
