@@ -80,7 +80,7 @@ int main(int argc, char **argv){
   SQLCHAR outstr[1024];
   SQLSMALLINT outstrlen;
   SQLHSTMT stmt;
-  int descuento,boolean,aux,dni,id_oferta,i;
+  int descuento,boolean,aux,dni,id_venta,i;
   float precio,total=0;
   char buff[1000],scrname[100],titulo[100],*actual,ET[2]="E";
 
@@ -346,19 +346,19 @@ int main(int argc, char **argv){
     return 0;
   }
   /*Ahora introducimos todas las relaciones entre los isbns y la venta*/
-  /*Primero necesitamos el id_oferta de la venta*/
+  /*Primero necesitamos el id_venta de la venta*/
   /*ASUMIMOS QUE UNA VENTA DEL MISMO PRECIO, FECHA Y DNI es unica*/
-  strcpy(buff,"select \"id_oferta\" from public.\"Ventas\" where \"Precio_Total\"=? and \"Fecha\"=? and \"DNI\"=?");
+  strcpy(buff,"select \"id_venta\" from public.\"Ventas\" where \"Precio_Total\"=? and \"Fecha\"=? and \"DNI\"=?");
   SQLPrepare(stmt,(SQLCHAR*)buff,SQL_NTS);
   SQLBindParameter(stmt,1,SQL_PARAM_INPUT,SQL_C_FLOAT,SQL_REAL,0,0,&total,0,NULL);
   SQLBindParameter(stmt,2,SQL_PARAM_INPUT,SQL_C_CHAR,SQL_CHAR,0,0,actual,0,NULL);
   SQLBindParameter(stmt,3,SQL_PARAM_INPUT,SQL_C_SLONG,SQL_INTEGER,0,0,&dni,0,NULL);
-  SQLBindCol(stmt,1,SQL_C_SLONG,&id_oferta,sizeof(id_oferta),NULL);
+  SQLBindCol(stmt,1,SQL_C_SLONG,&id_venta,sizeof(id_venta),NULL);
   SQLExecute(stmt);
   /*Se ejecuta la consulta y se guarda en idoferta el id de la venta*/
   SQLFetch(stmt);
   SQLFreeHandle(SQL_HANDLE_STMT,stmt);
-  
+
 
   /*Ahora hacemos un bucle introduciendo todas las relaciones*/
   strcpy(buff,"insert into public.\"Vendido\"(\"ISBN\", \"Id_Venta\") values (?, ?)");
@@ -375,7 +375,7 @@ int main(int argc, char **argv){
     }
     SQLPrepare(stmt,(SQLCHAR*)buff,SQL_NTS);
     SQLBindParameter(stmt,1,SQL_PARAM_INPUT,SQL_C_SLONG,SQL_INTEGER,0,0,&aux,0,NULL);
-    SQLBindParameter(stmt,2,SQL_PARAM_INPUT,SQL_C_SLONG,SQL_INTEGER,0,0,&id_oferta,0,NULL);
+    SQLBindParameter(stmt,2,SQL_PARAM_INPUT,SQL_C_SLONG,SQL_INTEGER,0,0,&id_venta,0,NULL);
     /*Se ejecuta la consulta */
     ret=SQLExecute(stmt);
     SQLFreeHandle(SQL_HANDLE_STMT,stmt);
