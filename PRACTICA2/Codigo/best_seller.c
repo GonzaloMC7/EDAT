@@ -3,7 +3,6 @@
 #include <string.h>
 #include <sql.h>
 #include <sqlext.h>
-#include "odbc.h"
 #define TRUE 1
 #define FALSE 0
 
@@ -50,7 +49,6 @@ int main(int argc, char **argv){
   }
   else{
     fprintf(stderr, "Error al conectarse a la base de datos\n");
-    odbc_extract_error("SQLDriverConnect", dbc, SQL_HANDLE_DBC);
     /* disconnect from database and free up allocated handles */
     SQLDisconnect(dbc);
     SQLFreeHandle(SQL_HANDLE_DBC, dbc);

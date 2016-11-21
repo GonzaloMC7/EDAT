@@ -3,9 +3,66 @@
 #include <string.h>
 #include <sql.h>
 #include <sqlext.h>
-#include "odbc.h"
-#define TRUE 1
-#define FALSE 0
+
+/*
+  Parameters: dbc , array of isbns, size is the size of the array
+  Returns:
+    0 if all isbns are in the database and 1 otherwise
+*/
+int areIsbn(SQLHDBC dbc,char **isbns,int size){
+  SQLRETURN ret;
+  SQLHSTMT stmt;
+  char query[1000];
+  int i;
+
+  SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
+  for(i=0;i<size;i++){
+    sprintf(query,"select \"ISBN\" from public.\"Edicion\""
+            " where \"ISBN\"='%s'",isbns[i]);
+    SQLPrepare(stmt,(SQLCHAR*)query,SQL_NTS);
+    SQLExecute(stmt);
+    ret=SQLFetch(stmt);
+    SQLCloseCursor(stmt);
+    if(!SQL_SUCCEEDED(ret)){
+      SQLFreeHandle(SQL_HANDLE_STMT,stmt);
+      return 1;
+    }
+  }
+  SQLFreeHandle(SQL_HANDLE_STMT,stmt);
+  return 0;
+}
+
+/*
+  Inserts offers in the isbns give, with the descuento given and in the
+  dates given.
+  Parameters: array of isbns, size is the size of the array,
+              descuento is the field descuento, idate starting date,
+              edate ending date;
+*/
+void insOffers(SQLHDBC dbc, char **isbns, int size, int descuento, char *idate, char *edate){
+  SQLRETURN ret;
+  SQLHSTMT stmt;
+  char query[1000];
+  int i;
+
+  SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
+  for(i=0;i<size;i++){
+    sprintf(query,"insert into public.\"Ofertas\" "
+            "(\"Inicio\", \"Fin\",\"descuento\",\"ISBN\")"
+            " values ('%s','%s','%d','%s')",idate,edate,descuento,isbns[i]);
+    SQLPrepare(stmt,(SQLCHAR*)query,SQL_NTS);
+    ret=SQLExecute(stmt);
+    SQLCloseCursor(stmt);
+    if(!SQL_SUCCEEDED(ret)){
+      printf("Error al introducir una oferta.\n");
+      SQLFreeHandle(SQL_HANDLE_STMT,stmt);
+      return;
+    }
+  }
+  printf("Todas las ofertas han sido agregadas con exito\n");
+  SQLFreeHandle(SQL_HANDLE_STMT,stmt);
+  return;
+}
 
 int main(int argc, char **argv){
   SQLHENV env;
@@ -13,16 +70,14 @@ int main(int argc, char **argv){
   SQLRETURN ret; /* ODBC API return status */
   SQLCHAR outstr[1024];
   SQLSMALLINT outstrlen;
-  SQLHSTMT stmt;
-  int boolean, descuento,i,aux;
-  char buff[1000];
+  int descuento;
+
 
   /*REVISAMOS LOS DATOS DE ENTRADA*/
-  if(argc<4){
+  if(argc<5){
     printf("ERROR, faltan argumentos.\n");
     return 0;
   }
-
   descuento=atoi(argv[1]);
   /*Comprobamos que las fechas son coherentes, asumimos que nos las pasan bien*/
   /*con el formato anyo-mes-dia*/
@@ -33,7 +88,7 @@ int main(int argc, char **argv){
 
 
 
-  /*LETS CONNECT TO THE DATABASE*/
+  /*CONNECTION*/
   /* Allocate an environment handle */
   SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &env);
   /* We want ODBC 3 support */
@@ -41,110 +96,28 @@ int main(int argc, char **argv){
   /* Allocate a connection handle */
   SQLAllocHandle(SQL_HANDLE_DBC, env, &dbc);
   /* Connect to the DSN mydsn */
-  ret = SQLDriverConnect(dbc, NULL, (SQLCHAR*) "DRIVER=PostgreSQL ANSI;DATABASE=PRACT_2;SERVER=localhost;PORT=5432;UID=alumnodb;PWD=alumnodb;", SQL_NTS,
-                         outstr, sizeof(outstr), &outstrlen,
-                         SQL_DRIVER_NOPROMPT);
-
-  /*Probamos que se haya conectado con exito*/
+  ret = SQLDriverConnect(dbc, NULL, (SQLCHAR*) "DRIVER=PostgreSQL ANSI;"
+                        "DATABASE=PRACT_2;SERVER=localhost;PORT=5432;"
+                        "UID=alumnodb;PWD=alumnodb;", SQL_NTS, outstr,
+                        sizeof(outstr), &outstrlen, SQL_DRIVER_NOPROMPT);
+  /*Probamos la conexion*/
   if(SQL_SUCCEEDED(ret)){
     printf("Conectado a la base de datos\n\n");
   }
   else{
-    fprintf(stderr, "Error al conectarse a la base de datos\n");
-    odbc_extract_error("SQLDriverConnect", dbc, SQL_HANDLE_DBC);
-    /* disconnect from database and free up allocated handles */
-    SQLDisconnect(dbc);
-    SQLFreeHandle(SQL_HANDLE_DBC, dbc);
-    SQLFreeHandle(SQL_HANDLE_ENV, env);
-    return 0;
+    printf("Error en la conexión con la base de datos\n");
+    goto DESCONECTAR;
   }
-
-
-
-
   /*REVISEMOS QUE TODOS LOS ISBNS ESTAN EN NUESTRA BASE DE DATOS*/
-  strcpy(buff,"select \"ISBN\" from public.\"Edicion\" where \"ISBN\"=?");
-  boolean=TRUE;
-  for(i=4;i<argc && boolean==TRUE;i++){
-    /*asignamos el isbn a una variable auxiliar*/
-    aux=atoi(argv[i]);
-
-    /*Guardamos memoria para guardar la tabla en stmt*/
-    ret=SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
-    if(!SQL_SUCCEEDED(ret)){
-      printf("Error allocating statement\n");
-      SQLDisconnect(dbc);
-      SQLFreeHandle(SQL_HANDLE_DBC, dbc);
-      SQLFreeHandle(SQL_HANDLE_ENV, env);
-      return 0;
-    }
-
-    /*preparamos la consulta*/
-    SQLPrepare(stmt,(SQLCHAR*)buff,SQL_NTS);
-    SQLBindParameter(stmt,1,SQL_PARAM_INPUT,SQL_C_SLONG,SQL_INTEGER,0,0,&aux,0,NULL);
-    SQLExecute(stmt);
-
-    /*hacemos un fetch*/
-    ret=SQLFetch(stmt);
-    /*si el fetch falla, el isbn no esta en la tabla*/
-    if(!SQL_SUCCEEDED(ret)){
-      boolean=FALSE;
-    }
-    /*liberamos la tabla para utilizar despues*/
-    SQLFreeHandle(SQL_HANDLE_STMT, stmt);
+  if(areIsbn(dbc,argv+4, argc-4)!=0){
+    printf("Algun ISBN no esta en nuestra base de datos.\n"
+           "No se han podido introducir las ofertas\n");
+    goto DESCONECTAR;
   }
+  /*insertamos ofertas*/
+  insOffers(dbc,argv+4,argc-4,descuento,argv[2],argv[3]);
 
-  /*si algun isbn no esta en la tabla, sal del programa*/
-  if(boolean==FALSE){
-    /*Desconectamos y liberamos*/
-    SQLDisconnect(dbc);
-    SQLFreeHandle(SQL_HANDLE_DBC, dbc);
-    SQLFreeHandle(SQL_HANDLE_ENV, env);
-    printf("ERROR, algun isbn no esta en nuestra base de datos.\n");
-    return 0;
-  }
-
-
-
-  /*HACEMOS LA CONSULTA INSERT INTO*/
- 	/*Creamos la consulta*/
- 	strcpy(buff, "insert into public.\"Ofertas\" (\"Inicio\", \"Fin\",\"descuento\",\"ISBN\") values (?,?,?,?)");
- 	for(i=4;i<argc; i++){
-    /*Guardamos memoria para guardar la tabla en stmt*/
-    ret=SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
-    if(!SQL_SUCCEEDED(ret)){
-		    printf("Error allocating statement\n");
-      	SQLDisconnect(dbc);
-      	SQLFreeHandle(SQL_HANDLE_DBC, dbc);
-      	SQLFreeHandle(SQL_HANDLE_ENV, env);
-    		return 0;
-    }
-
-    aux=atoi(argv[i]);
-    SQLPrepare(stmt,(SQLCHAR*)buff,SQL_NTS);
-    SQLBindParameter(stmt,1,SQL_PARAM_INPUT,SQL_C_CHAR,SQL_CHAR,0,0,argv[2],0,NULL);
-    SQLBindParameter(stmt,2,SQL_PARAM_INPUT,SQL_C_CHAR,SQL_CHAR,0,0,argv[3],0,NULL);
-    SQLBindParameter(stmt,3,SQL_PARAM_INPUT,SQL_C_SLONG,SQL_INTEGER,0,0,&descuento,0,NULL);
-    SQLBindParameter(stmt,4,SQL_PARAM_INPUT,SQL_C_SLONG,SQL_INTEGER,0,0,&aux,0,NULL);
-
-		/*Realizamos la consulta y la guardamos en stmt*/
-    ret=SQLExecute(stmt);
-    if(!SQL_SUCCEEDED(ret)){
-      printf("Error en la ejecucion de la consulta insert into\n");
-      printf("No se ha podido agregar alguna oferta.\n");
-      SQLDisconnect(dbc);
-      SQLFreeHandle(SQL_HANDLE_STMT, stmt);
-      SQLFreeHandle(SQL_HANDLE_DBC, dbc);
-      SQLFreeHandle(SQL_HANDLE_ENV, env);
-      return 0;
-    }else{
-      /*La oferta se ha ejecutado con exito*/
-      /*Liberamos la tabla*/
-      SQLFreeHandle(SQL_HANDLE_STMT, stmt);
-    }
-  }
-
-  printf("Todas las ofertas han sido agregadas con exito\n");
+  DESCONECTAR:
   /*Desconectamos y liberamos*/
   SQLDisconnect(dbc);
   SQLFreeHandle(SQL_HANDLE_DBC, dbc);
