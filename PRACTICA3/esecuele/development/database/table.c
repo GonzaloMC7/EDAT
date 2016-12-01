@@ -3,6 +3,7 @@
 #include <string.h>
 #include "table.h"
 #include "../type/type.h"
+#define MAX 300
 
 struct table_ {
   char * path;
@@ -87,15 +88,38 @@ type_t* table_types(table_t* table) {
 }
 
 long table_first_pos(table_t* table) {
-  int pos,i;
   if(table==NULL)
     return;
   return sizeof(int)+table->ncols*sizeof(types_t);
 }
 
 long table_last_pos(table_t* table) {
+  int  i, pos,aux,posaux;
+  char buff[MAX],*baux;
+  FILE *f;
+
   if(table==NULL)
-    return;
+    return -1;
+
+  f=fopen(table->path,"r");
+  if(f==NULL)
+    return -1;
+  pos=table_first_pos(table);
+  fseek(f,pos,SEEK_SET);/*we put the pointer in the first record*/
+  posaux=pos;
+  while(fread(buff,sizeof(char),MAX,f)>0){
+    posaux=pos;
+    baux=buff;
+    for(i=0;i<table->ncols;i++){
+      aux=*((int *)baux);/*tamanio de la primera columna*/
+      pos=pos+sizeof(int)+aux;/*posicion de antes + int + columna*/
+      baux=baux+sizeof(int)+aux;
+    }
+    fseek(f,pos,SEEK_SET);/*fseek para dejarlo al final de la tupla leida*/
+  }
+  fclose(f);
+  return posaux;
+
 }
 
 record_t* table_read_record(table_t* table, long pos) {
