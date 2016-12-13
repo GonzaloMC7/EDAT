@@ -20,6 +20,8 @@ void table_create(char* path, int ncols, type_t* types) {
   f=fopen(path,"w");
   if(f==NULL)
     return;
+    /*Escribimos cabecera de fichero con la estructura
+      de la tabla*/
   fwrite(&ncols,sizeof(int),1,f);
   fwrite(types,sizeof(type_t),ncols,f);
   fclose(f);
@@ -94,40 +96,106 @@ long table_first_pos(table_t* table) {
 }
 
 long table_last_pos(table_t* table) {
-  int  i, pos,aux,posaux;
-  char buff[MAX],*baux;
   FILE *f;
-
+  long aux;
   if(table==NULL)
     return -1;
 
   f=fopen(table->path,"r");
-  if(f==NULL)
+  if(f==NULL){
     return -1;
-  pos=table_first_pos(table);
-  fseek(f,pos,SEEK_SET);/*we put the pointer in the first record*/
-  posaux=pos;
-  while(fread(buff,sizeof(char),MAX,f)>0){
-    posaux=pos;
-    baux=buff;
-    for(i=0;i<table->ncols;i++){
-      aux=*((int *)baux);/*tamanio de la primera columna*/
-      pos=pos+sizeof(int)+aux;/*posicion de antes + int + columna*/
-      baux=baux+sizeof(int)+aux;
-    }
-    fseek(f,pos,SEEK_SET);/*fseek para dejarlo al final de la tupla leida*/
   }
+  fseek(f,0,SEEK_END);/*fseek para dejar el puntero al final del 				            fichero*/
+  aux=ftell(f);/*guardamos la posicion del fichero*/
   fclose(f);
-  return posaux;
+  return aux;
 
 }
 
 record_t* table_read_record(table_t* table, long pos) {
-  if(table==NULL)
+    record_t *rec=NULL;/*record a guardar*/  
+    FILE *f;/*direccion al fichero de la tabla*/
+    int i,j,tam;
+    long pos;
+    type_t type;
+    void **buff;
+
+    if(table==NULL)
+        return;
+    /*Abrimos el fichero*/
+    f=fopen(table->path,"r");
+    if(f==NULL)
+        return NULL;
+
+    /*Leemos la informacion de la tupla*/
+
+    /*Guardamos el espacio para el numero de columnas*/
+    buff=(void **)malloc(sizeof(void *)*table->ncols);
+    if(buff==NULL)
+        goto ERR1;
+    /*Movemos el puntero a la posicion dada*/
+    fseek(f,pos,SEEK_SET);    
+    /*Para cada columna*/
+    for(i=0;i<table->ncols;i++{
+        /*Tamaño a leer*/
+        fread(tam,sizeof(int),1,f);
+        /*Guardamos en la primera con el espacio necesario*/
+        buff[i]=(void *)malloc(tam);
+        if(buff[i]==NULL){
+            for(j=0;j<i;j++){
+                free(buff[j]);
+            }
+            goto ERR2;
+        }
+        fread(buff[i],tam,1,f);    
+    }
+    /*Creamos el record*/
+    /*Buscamos la posicion del siguiente*/
+    pos=ftell(f);
+    rec=record_create(buff,table->ncols,pos); 
+
+    /*cerramos fichero y liberamos el buff generico*/
+    /*No liberamos cada columna ya que el record apunta*/
+    /*directamente a estas columnas*/
+    ERR2:
+    free(buff);
+    ERR1:    
+    fclose(f);
+    return rec;
+}
+
+void table_insert_record(table_t* table, void** values) {    
+    int tam;
+    FILE *f;    
+    if(table==NULL || values==NULL)
+        return;
+    /*Abrimos el fichero apuntando al final*/
+    f=fopen(table->path,"a");
+    if(f==NULL)
+        return;
+    /*Escribimos cols una a una*/
+    for(i=0;i<table->ncols;i++){
+        /*Escribimos su tamano*/
+        tam=sizeof(values[i]);
+        fwrite(&tam,sizeof(int),1,f);
+        /*Escribimos el dato*/
+        fwrite(values[i],tam,1,f);
+    }
+    fclose(f);
     return;
 }
 
-void table_insert_record(table_t* table, void** values) {
-  if(table==NULL)
-    return;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
