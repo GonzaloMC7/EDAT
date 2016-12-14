@@ -1,0 +1,16 @@
+#edicion_id	titulo	cantidad
+1	El universo en una cascara de nuez	25
+2	La caida de los gigantes	142
+3	El resplandor	852
+4	La sombra del viento	40
+5	Tokio blues	85
+6	Introduccion al analisis matematico	5
+7	El secreto del camino	83
+8	Holocausto	90
+9	La casa de los espiritus	40
+10	El Aleph	93
+11	El ultimo caton	80
+12	Palmeras en la nieve	49
+13	Los pilares de la tierra	90
+14	Cien anyos de soledad	15
+15	La celestina	55
