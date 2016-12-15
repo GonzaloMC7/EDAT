@@ -51,3 +51,9 @@ EOF
 $COMMAND query bank_db << EOF
 accounts SEQUENTIAl 5 OFFSET
 EOF
+
+# Probando todas las operaciones
+# -Count the number of first five accounts union five last accounts
+$COMMAND query bank_db << EOF
+accounts SEQUENTIAL 5 OFFSET accounts SEQUENTIAL 5 LIMIT UNION COUNT
+EOF
