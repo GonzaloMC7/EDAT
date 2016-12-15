@@ -28,4 +28,26 @@ $COMMAND query bank_db << EOF
 accounts SEQUENTIAL 1 STR Queens C_COLEQCTE SELECT INT 0 P_COL INT 2 P_COL 2 PROJECT accounts_clients SEQUENTIAL PRODUCT 0 2 C_COLEQCOL SELECT INT 0 P_COL INT 1 P_COL INT 3 P_COL 3 PROJECT clients SEQUENTIAL PRODUCT 2 3 C_COLEQCOL SELECT INT 0 P_COL INT 1 P_COL STR 4 P_COL 3 PROJECT
 EOF
 
-#$COMMAND query bank_db
+# Probando la operacion COUNT
+# - Count the number of clients
+$COMMAND query bank_db << EOF
+clients SEQUENTIAL COUNT
+EOF
+
+# Probando la operacion UNION
+# - Do the union of the same table accounts
+$COMMAND query bank_db << EOF
+accounts SEQUENTIAL accounts SEQUENTIAL UNION
+EOF
+
+# Probando la operacion LIMIT
+# -Show the first five rows of table accounts
+$COMMAND query bank_db << EOF
+accounts SEQUENTIAL 5 LIMIT
+EOF
+
+# Probando la operacion OFFSET
+# -Show the last five rows of table accounts
+$COMMAND query bank_db << EOF
+accounts SEQUENTIAl 5 OFFSET
+EOF
