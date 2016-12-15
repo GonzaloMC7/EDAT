@@ -53,7 +53,6 @@ operation_union_create(operation_t* operation1, operation_t* operation2)
     operation_union_args_t* args;
 
     args             = malloc(sizeof(operation_union_args_t));
-    args->first_next = 1;
     args->operation1 = operation1;
     args->operation2 = operation2;
 

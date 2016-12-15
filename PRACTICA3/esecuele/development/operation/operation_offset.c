@@ -13,7 +13,7 @@ void
 operation_offset_reset(void* vargs)
 {
     operation_offset_args_t* args = vargs;
-    operation_reset(args);
+    operation_reset(args->suboperation);
     args->n = 0;
 }
 
@@ -24,10 +24,10 @@ int operation_offset_next(void* vargs)
     while (args->n < args->offset)
     {
         args->n++;
-        ret = operation_next(args->suboperation)
-              /*if there are not enough rows*/
-              if (ret == 0)
-            return ret;
+        ret = operation_next(args->suboperation);
+        /*if there are not enough rows*/
+        if (ret == 0)
+        	return ret;
     }
     args->n++;
     return operation_next(args->suboperation);
@@ -70,5 +70,5 @@ operation_offset_create(operation_t* suboperation, int offset)
 
     return operation;
 }
-}
+
 
