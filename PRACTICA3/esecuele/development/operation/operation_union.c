@@ -7,13 +7,14 @@ typedef struct
 {
     operation_t* operation1;
     operation_t* operation2;
+    int        flag;
 } operation_union_args_t;
 
 void
 operation_union_reset(void* vargs)
 {
     operation_union_args_t* args = vargs;
-
+    args->flag = 0;
     operation_reset(args->operation1);
     operation_reset(args->operation2);
 }
@@ -26,7 +27,8 @@ int operation_union_next(void* vargs)
     /*if there is something in the first operation return it */
     if (ret != 0)
         return ret;
-    /*if theres nothing we check the second operation*/
+    /*if theres nothing we active the flag and check the second operation*/
+    args->flag = 1;
     return operation_next(args->operation2);
 }
 
@@ -35,6 +37,12 @@ void* operation_union_get(int col, void* vargs)
     operation_union_args_t* args       = vargs;
     operation_t           * operation1 = args->operation1;
     operation_t           * operation2 = args->operation2;
+    /*If the flag is not active then return the operation 1 rows*/
+    if (args->flag == 0)
+        return operation_get(col, operation1);
+
+    /*else return the operation2 rows*/
+    return operation_get(col, operation2);
 }
 
 void operation_union_close(void* vargs)
@@ -55,7 +63,7 @@ operation_union_create(operation_t* operation1, operation_t* operation2)
     args             = malloc(sizeof(operation_union_args_t));
     args->operation1 = operation1;
     args->operation2 = operation2;
-
+    args->flag       = 0;
     operation        = malloc(sizeof(operation_t));
     operation->args  = args;
     operation->reset = operation_union_reset;

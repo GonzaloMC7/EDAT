@@ -1,19 +1,19 @@
-all: test
+all: test	 clean
 	
 test: testTableRecord.o table.o record.o type.o
 	gcc -o test testTableRecord.o table.o record.o type.o
 
 testTableRecord.o: testTableRecord.c table.h record.h ../type/type.h
-	gcc -c testTableRecord.c
+	gcc -c -g testTableRecord.c
 	
 table.o: table.c table.h
-	gcc -c table.c
+	gcc -c -g table.c
 	
 record.o: record.c record.h
-	gcc -c record.c
+	gcc -c -g record.c
 	
 type.o: ../type/type.c ../type/type.h
-	gcc -c ../type/type.c
+	gcc -c -g ../type/type.c
 	
 clean:
 	rm *.o
