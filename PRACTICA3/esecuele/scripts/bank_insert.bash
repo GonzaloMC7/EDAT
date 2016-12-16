@@ -2,21 +2,21 @@
 
 COMMAND="./esecuele"
 
-rm -rf bank_db
+#rm -rf bank_db
 
-$COMMAND createdb bank_db
+#$COMMAND createdb bank_db
 
-$COMMAND define bank_db << EOF
-TABLE clients 2 INT STR
-TABLE accounts 3 INT STR INT
-TABLE accounts_clients 2 INT INT
-EOF
-
-#$COMMAND insert bank_db << EOF
-#COPY clients ./example_files/clients.txt
-#COPY accounts ./example_files/accounts.txt
-#COPY accounts_clients ./example_files/accounts_clients.txt
+#$COMMAND define bank_db << EOF
+#TABLE clients 2 INT STR
+#TABLE accounts 3 INT STR INT
+#TABLE accounts_clients 2 INT INT
 #EOF
+
+$COMMAND insert bank_db << EOF
+COPY clients ./example_files/clients.txt
+COPY accounts ./example_files/accounts.txt
+COPY accounts_clients ./example_files/accounts_clients.txt
+EOF
 
 ## Test the following queries:
 ## - Which are the accounts of the Brooklyn branch? Show account_id and amount
