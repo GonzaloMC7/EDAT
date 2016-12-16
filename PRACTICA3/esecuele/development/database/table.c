@@ -183,8 +183,9 @@ record_t* table_read_record(table_t* table, long pos)
 
 void table_insert_record(table_t* table, void** values)
 {
-    int  tam, i;
-    FILE *f;
+    int    i;
+    size_t tam;
+    FILE   *f;
     if (table == NULL || values == NULL)
         return;
     /*Abrimos el fichero apuntando al final*/
@@ -195,8 +196,9 @@ void table_insert_record(table_t* table, void** values)
     for (i = 0; i < table->ncols; i++)
     {
         /*Escribimos su tamano*/
-        tam = sizeof(values[i]);
-        fwrite(&tam, sizeof(int), 1, f);
+        tam = value_length(table->types[i], values[i]);
+
+        fwrite(&tam, sizeof(long), 1, f);
         /*Escribimos el dato*/
         fwrite(values[i], tam, 1, f);
     }

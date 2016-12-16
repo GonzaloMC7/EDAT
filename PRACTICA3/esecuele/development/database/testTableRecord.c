@@ -18,7 +18,7 @@ int main()
     type_t   *types, *aux;
     int      i, *naux;
     long     pos;
-    record_t *record1, *record2;
+    record_t *record;
     void     **values;
 
     types = (type_t *) malloc(sizeof(type_t) * 3);
@@ -76,70 +76,59 @@ int main()
 
 
 
-    /*Probemos que funciona el record y sus funciones*/
-
-    /*Guardemos espacio para nuestro buffer con el cual rellenaremos los records*/
+    /*Insertemos records en table y probamos records desde table*/
     values = (void * *) malloc(sizeof(void *) * 3);
     /*Para cada campo ahora*/
     naux      = (int *) malloc(sizeof(int));
     *naux     = 23;
-    values[0] = aux;
+    values[0] = naux;
     values[1] = (char *) malloc(sizeof(char) * (strlen("Pepe") + 1));
     strcpy(values[1], "Pepe");
     naux      = (int *) malloc(sizeof(int));
     *naux     = 2;
     values[2] = naux;
+    /*insertamos un record*/
+    table_insert_record(tabla, values);
 
-    /*Inicialicemos nuestro primer record*/
-    pos     = table_last_pos(tabla);
-    pos     = pos + sizeof(int) * 2 + sizeof(char) * (strlen(values[1]) + 1);
-    record1 = record_create(values, 3, pos);
-    if (record1 != NULL)
-    {
-        printf("Creado el record1 con exito\n");
-        printf("Correcto funcionamiento de record_create y table_last_pos\n");
-    }
-    else
-    {
-        printf("Error en el creado de record1\n");
-        printf("Funcionamiento errado de record_create o table_last_pos\n");
-        goto ERR3;
-    }
+    /*cambiemos los valores de values*/
+    *naux = 12;
+    strcpy(values[1], "Juan");
+    *naux = 8;
+    /*Insertamos otro record*/
+    table_insert_record(tabla, values);
 
-    /*Reservamos nueva memoria e inicializamos el record2*/
-    naux      = (int *) malloc(sizeof(int));
-    *naux     = 15;
-    values[0] = naux;
-    values[1] = (char *) malloc(sizeof(char) * (strlen("Simone") + 1));
-    strcpy(values[1], "Simone");
-    naux      = (int *) malloc(sizeof(int));
-    *naux     = 8;
-    values[2] = naux;
-
-    pos     = table_last_pos(tabla);
-    pos     = pos + sizeof(int) * 2 + sizeof(char) * (strlen(values[1]) + 1);
-    record2 = record_create(values, 3, pos);
-    if (record2 != NULL)
-    {
-        printf("Creado el record2 con exito\n");
-        printf("Correcto funcionamiento de record_create y table_last_pos\n");
-    }
-    else
-    {
-        printf("Error en el creado de record2\n");
-        printf("Funcionamiento errado de record_create o table_last_pos\n");
-        goto ERR4;
-    }
-
-    /*NECESITAMOS INSERTAR VARIOS RECORDS*/
-    /*LEERLOS Y COMPARAR QUE COINCIDEN CON LOS INSERTADOS*/
-    /*PROBAR LAS FUNCIONS DE FIRST Y LAST POSITION*/
-
-    record_free(record2);
- ERR4:
-    record_free(record1);
- ERR3:
+    /*Liberamos los values utilizados*/
+    for (i = 0; i < 3; i++)
+        free(values[i]);
     free(values);
+
+    printf("\nSalida esperada:\n");
+    printf("\nTabla:\n23\tPepe\t2\n12\tJuan\t8\n");
+    printf("\nSalida:\n");
+    /*POSIBLES FALLOS EN CREATE CON LA CABECERA O EN INSERT O EN FUNCS DE RECORD*/
+    /*Extraigamos records e imprimamoslo por pantalla*/
+    pos    = table_first_pos(tabla);
+    record = table_read_record(tabla, pos);
+    printf("\nTabla:\n");
+    for (i = 1; i <= 3; i++)
+    {
+        print_value(stdout, aux[i - 1], record_get(record, i));
+        printf("\t");
+    }
+    printf("\n");
+    pos = record_next(record);
+    record_free(record);
+    /*Abrimos el siguiente record*/
+    record = table_read_record(tabla, pos);
+    for (i = 1; i <= 3; i++)
+    {
+        print_value(stdout, aux[i - 1], record_get(record, i));
+        printf("\t");
+    }
+    printf("\n");
+    record_free(record);
+    printf("\nSi la salida coincide con la esperada todo funciona correctamente\n");
+
  ERR2:
     table_close(tabla); /*Se prueba el buen funcionamiento de esto con valgrind*/
  ERR1:

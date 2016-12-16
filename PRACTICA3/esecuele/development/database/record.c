@@ -43,10 +43,9 @@ record_t* record_create(void** values, int ncols, long next)
 
 void* record_get(record_t* record, int n)
 {
-    int i;
     if (record == NULL || n > record->ncols)
         return NULL;
-    return record->pares[i].value;
+    return record->pares[n - 1].value;
 }
 
 long record_next(record_t* record)
