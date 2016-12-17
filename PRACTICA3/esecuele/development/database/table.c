@@ -129,7 +129,8 @@ record_t* table_read_record(table_t* table, long pos)
 {
     record_t *rec = NULL; /*record a guardar*/
     FILE     *f;          /*direccion al fichero de la tabla*/
-    int      i, j, tam;
+    int      i, j;
+    size_t   tam;
     long     auxpos;
     type_t   type;
     void     **buff;
@@ -153,7 +154,7 @@ record_t* table_read_record(table_t* table, long pos)
     for (i = 0; i < table->ncols; i++)
     {
         /*Tamaño a leer*/
-        fread(&tam, sizeof(int), 1, f);
+        fread(&tam, sizeof(size_t), 1, f);
         /*Guardamos en la primera con el espacio necesario*/
         buff[i] = (void *) malloc(tam);
         if (buff[i] == NULL)

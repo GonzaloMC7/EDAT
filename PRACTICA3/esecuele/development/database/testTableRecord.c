@@ -73,7 +73,7 @@ int main()
         printf("ERROR: tabla_types salida incorrecta\n");
         goto ERR2;
     }
-
+    printf("table_create y table_open ejecutadas con exito\n");
 
 
     /*Insertemos records en table y probamos records desde table*/
@@ -105,7 +105,7 @@ int main()
     printf("\nSalida esperada:\n");
     printf("\nTabla:\n23\tPepe\t2\n12\tJuan\t8\n");
     printf("\nSalida:\n");
-    /*POSIBLES FALLOS EN CREATE CON LA CABECERA O EN INSERT O EN FUNCS DE RECORD*/
+    /*POSIBLES FALLOS  EN INSERT O EN FUNCS DE RECORD*/
     /*Extraigamos records e imprimamoslo por pantalla*/
     pos    = table_first_pos(tabla);
     record = table_read_record(tabla, pos);
