@@ -2,24 +2,24 @@
 
 COMMAND="./esecuele"
 
-rm -rf libros_db
+#rm -rf libros_db
 
 #Crea la Base de Datos Libros
-$COMMAND createdb libros_db
+#$COMMAND createdb libros_db
 
 #Define las tablas de la base de datos
-$COMMAND define libros_db << EOF
-TABLE edicion 3 INT STR INT
-TABLE usuarios 2 INT STR
-TABLE ventas 2 INT INT
-EOF
+#$COMMAND define libros_db << EOF
+#TABLE edicion 3 INT STR INT
+#TABLE usuarios 2 INT STR
+#TABLE ventas 2 INT INT
+#EOF
 
 ##Inserta los valores de las tablas
-$COMMAND insert libros_db << EOF
-COPY edicion ./libros_files/edicion.txt
-COPY usuarios ./libros_files/usuarios.txt
-COPY ventas ./libros_files/ventas.txt
-EOF
+#$COMMAND insert libros_db << EOF
+#COPY edicion ./libros_files/edicion.txt
+#COPY usuarios ./libros_files/usuarios.txt
+#COPY ventas ./libros_files/ventas.txt
+#EOF
 
 ##Probando las consultas:
 ## - Lista de libros comprados por "Jack"

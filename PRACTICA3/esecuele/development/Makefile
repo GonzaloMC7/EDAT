@@ -176,14 +176,41 @@ type.o:	$(TYPEDIR)/type.c $(TYPEDIR)/type.o
 esecuele:	$(MAINOBJS)
 	$(LNK) -o ../install/esecuele $(MAINOBJS)
 	cp bank.bash ../install
-	cp -r example_files ../install/
+	cp -r bank/example_files ../install
+	cp bank/bank_scripts/bank_create.bash ../install
+	cp bank/bank_scripts/bank_insert.bash ../install
+	cp bank/bank_scripts/bank_query1.bash ../install
+	cp bank/bank_scripts/bank_query2.bash ../install
+	cp bank/bank_scripts/bank_queryCount.bash ../install
+	cp bank/bank_scripts/bank_queryUnion.bash ../install
+	cp bank/bank_scripts/bank_queryLimit.bash ../install
+	cp bank/bank_scripts/bank_queryOffset.bash ../install
+	cp bank/bank_scripts/bank_queryOperations.bash ../install
+	cp bank/bank_scripts/bank_queries.bash ../install
+	cp libros.bash ../install
+	cp -r libros/libros_files ../install/
+	cp libros/libros_scripts/libros_create.bash ../install
+	cp libros/libros_scripts/libros_insert.bash ../install
+	cp libros/libros_scripts/libros_query1.bash ../install
+	cp libros/libros_scripts/libros_query2.bash ../install
+	cp libros/libros_scripts/libros_queries.bash ../install
+	
 
 
 wvs:	$(ALTOBJS)
 	$(LNK) -o ../install/esecuele $(ALTOBJS)
 	cp bank.bash ../install
-	cp -r example_files ../install/
-
+	cp -r example_files ../install
+	cp bank/bank_scripts/bank_create.bash ../install
+	cp bank/bank_scripts/bank_insert.bash ../install
+	cp bank/bank_scripts/bank_query1.bash ../install
+	cp bank/bank_scripts/bank_query2.bash ../install
+	cp bank/bank_scripts/bank_queryCount.bash ../install
+	cp bank/bank_scripts/bank_queryUnion.bash ../install
+	cp bank/bank_scripts/bank_queryLimit.bash ../install
+	cp bank/bank_scripts/bank_queryOffset.bash ../install
+	cp bank/bank_scripts/bank_queryOperations.bash ../install
+	cp bank/bank_scripts/bank_queries.bash ../install
 
 clean:
 	rm *.o
