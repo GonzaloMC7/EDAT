@@ -15,14 +15,10 @@ struct table_
 void table_create(char* path, int ncols, type_t* types)
 {
     FILE *f;
-    char *p;
     if (ncols < 1 || path == NULL || types == NULL)
         return;
 
-    p = (char *) malloc(sizeof(char) * (strlen(path) + 1 + 6));
-    strcpy(p, path);
-    strcat(p, ".table");
-    f = fopen(p, "w");
+    f = fopen(path, "w");
     if (f == NULL)
         return;
     /*Escribimos cabecera de fichero con la estructura
@@ -30,7 +26,6 @@ void table_create(char* path, int ncols, type_t* types)
     fwrite(&ncols, sizeof(int), 1, f);
     fwrite(types, sizeof(type_t), ncols, f);
     fclose(f);
-    free(p);
     return;
 }
 
@@ -44,7 +39,8 @@ table_t* table_open(char* path)
     table = (table_t *) malloc(sizeof(table_t));
     if (table == NULL)
         return NULL;
-    table->path = strdup(path);
+    table->path = (char *) malloc(sizeof(char) * (1 + strlen(path)));
+    strcpy(table->path, path);
     if (table->path == NULL)
         return NULL;
     f = fopen(path, "r");

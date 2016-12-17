@@ -31,7 +31,7 @@ int main()
 
     /*Probemos primero algunas funciones del table*/
     /*Si no funciona esto, no funciona nada del resto*/
-    table_create("Personas", 3, types);
+    table_create("Personas.table", 3, types);
 
     tabla = table_open("Personas.table");
     if (tabla == NULL)
