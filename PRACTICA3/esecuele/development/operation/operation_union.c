@@ -23,10 +23,13 @@ int operation_union_next(void* vargs)
 {
     operation_union_args_t *args = vargs;
     int                    ret;
-    ret = operation_next(args->operation1);
-    /*if there is something in the first operation return it */
-    if (ret != 0)
-        return ret;
+    if (args->flag == 0)
+    {
+        ret = operation_next(args->operation1);
+        /*if there is something in the first operation return it */
+        if (ret != 0)
+            return ret;
+    }
     /*if theres nothing we active the flag and check the second operation*/
     args->flag = 1;
     return operation_next(args->operation2);
@@ -73,5 +76,6 @@ operation_union_create(operation_t* operation1, operation_t* operation2)
     operation->ncols = operation_ncols(operation1);
     operation->types = malloc(operation->ncols * sizeof(type_t));
     memcpy(operation->types, operation1->types, operation1->ncols * sizeof(type_t));
+    return operation;
 }
 
