@@ -48,13 +48,13 @@ COMMAND="./esecuele"
 #EOF
 
 ## Probando la operacion OFFSET
-## -Show the last five rows of table accounts
+## -Show the rows from position 5 of table accounts
 #$COMMAND query bank_db << EOF
 #accounts SEQUENTIAl 5 OFFSET
 #EOF
 
 ## Probando todas las operaciones
-## -Count the number of first five accounts union five last accounts
+## -Count the number of first five accounts union the rows from position 5 of table accounts.
 $COMMAND query bank_db << EOF
 accounts SEQUENTIAL 5 OFFSET accounts SEQUENTIAL 5 LIMIT UNION COUNT
 EOF
