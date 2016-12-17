@@ -4,8 +4,8 @@
 # (C) Simone Santini, 2016
 #
 
-CC = gcc -c -std=c99 -m32 
-LNK = gcc -m32
+CC = gcc -c -std=c99 
+LNK = gcc 
 
 SRC=.
 DBDIR=$(SRC)/database
@@ -200,7 +200,7 @@ esecuele:	$(MAINOBJS)
 wvs:	$(ALTOBJS)
 	$(LNK) -o ../install/esecuele $(ALTOBJS)
 	cp bank.bash ../install
-	cp -r example_files ../install
+	cp -r bank/example_files ../install
 	cp bank/bank_scripts/bank_create.bash ../install
 	cp bank/bank_scripts/bank_insert.bash ../install
 	cp bank/bank_scripts/bank_query1.bash ../install

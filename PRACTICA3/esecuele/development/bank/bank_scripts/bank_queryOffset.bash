@@ -50,7 +50,7 @@ COMMAND="./esecuele"
 ## Probando la operacion OFFSET
 ## -Show the last five rows of table accounts
 $COMMAND query bank_db << EOF
-accounts SEQUENTIAl 5 OFFSET
+accounts SEQUENTIAL 5 OFFSET
 EOF
 
 ## Probando todas las operaciones
