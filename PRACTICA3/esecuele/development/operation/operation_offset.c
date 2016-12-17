@@ -27,7 +27,7 @@ int operation_offset_next(void* vargs)
         ret = operation_next(args->suboperation);
         /*if there are not enough rows*/
         if (ret == 0)
-        	return ret;
+            return ret;
     }
     args->n++;
     return operation_next(args->suboperation);
@@ -45,6 +45,7 @@ void operation_offset_close(void* vargs)
     operation_offset_args_t* args = vargs;
 
     operation_close(args->suboperation);
+    free(args);
 }
 
 operation_t*
