@@ -45,7 +45,7 @@ void* record_get(record_t* record, int n)
 {
     if (record == NULL || n > record->ncols)
         return NULL;
-    return record->pares[n - 1].value;
+    return record->pares[n].value;
 }
 
 long record_next(record_t* record)

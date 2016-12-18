@@ -110,9 +110,9 @@ int main()
     pos    = table_first_pos(tabla);
     record = table_read_record(tabla, pos);
     printf("\nTabla:\n");
-    for (i = 1; i <= 3; i++)
+    for (i = 0; i < 3; i++)
     {
-        print_value(stdout, aux[i - 1], record_get(record, i));
+        print_value(stdout, aux[i], record_get(record, i));
         printf("\t");
     }
     printf("\n");
@@ -120,9 +120,9 @@ int main()
     record_free(record);
     /*Abrimos el siguiente record*/
     record = table_read_record(tabla, pos);
-    for (i = 1; i <= 3; i++)
+    for (i = 0; i < 3; i++)
     {
-        print_value(stdout, aux[i - 1], record_get(record, i));
+        print_value(stdout, aux[i], record_get(record, i));
         printf("\t");
     }
     printf("\n");
