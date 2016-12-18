@@ -44,7 +44,6 @@ int operation_count_next(void* vargs)
 void* operation_count_get(int col, void* vargs)
 {
     operation_count_args_t* args = vargs;
-
     return &args->num;
 }
 
@@ -72,9 +71,9 @@ operation_count_create(operation_t* suboperation)
     operation->next    = operation_count_next;
     operation->get     = operation_count_get;
     operation->close   = operation_count_close;
-    operation->ncols   = suboperation->ncols;
+    operation->ncols   = 1;
     operation->types   = malloc(operation->ncols * sizeof(type_t));
-    memcpy(operation->types, suboperation->types, operation->ncols * sizeof(type_t));
+    operation->types[0]=INT;
 
     return operation;
 }
