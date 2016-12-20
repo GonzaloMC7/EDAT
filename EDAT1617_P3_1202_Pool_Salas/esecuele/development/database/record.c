@@ -1,16 +1,10 @@
 #include "record.h"
 
 
-typedef struct par_
-{
-    int  size;
-    void *value;
-} par;
-
 struct record_
 {
     int  ncols;
-    par  *pares;
+    void **values;
     long next;
 };
 
@@ -25,19 +19,10 @@ record_t* record_create(void** values, int ncols, long next)
     record = (record_t *) malloc(sizeof(record_t));
     if (record == NULL)
         return NULL;
-    record->next  = next;
-    record->ncols = ncols;
-    record->pares = (par *) malloc(sizeof(par) * ncols);
-    if (record->pares == NULL)
-    {
-        free(record);
-        return NULL;
-    }
-    for (i = 0; i < ncols; i++)
-    {
-        record->pares[i].value = values[i];
-        record->pares[i].size  = sizeof(values[i]);
-    }
+    record->next   = next;
+    record->ncols  = ncols;
+    record->values = values;
+
     return record;
 }
 
@@ -45,7 +30,7 @@ void* record_get(record_t* record, int n)
 {
     if (record == NULL || n > record->ncols)
         return NULL;
-    return record->pares[n].value;
+    return record->values[n];
 }
 
 long record_next(record_t* record)
@@ -62,9 +47,9 @@ void record_free(record_t* record)
         return;
     for (i = 0; i < record->ncols; i++)
     {
-        free(record->pares[i].value);
+        free(record->values[i]);
     }
-    free(record->pares);
+    free(record->values);
     free(record);
     return;
 }

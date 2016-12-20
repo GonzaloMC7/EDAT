@@ -6,11 +6,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-typedef enum {
+typedef enum
+{
     INT, /*integer*/
     STR, /*string*/
     LONG,
-    DOUBLE,
+    DBL,
 } type_t;
 
 /* length in bytes of the value */
@@ -22,7 +23,7 @@ void
 print_value(FILE* f, type_t type, void* value);
 
 /* compares two values, returns an integer less than, equal to, or greater than zero if  value1  is  found,
-respectively, to be less than, to match, or be greater than value2*/
+   respectively, to be less than, to match, or be greater than value2*/
 int
 value_cmp(type_t type, void* value1, void* value2);
 
