@@ -23,15 +23,17 @@ void
 print_value(FILE* f, type_t type, void* value) {
     switch(type) {
         case INT:
-            fprintf(f, "%d", *((int*) value));
+            fprintf(f, "%d ", *((int*) value));
             break;
         case STR:
-            fprintf(f, "%s", (char*) value);
+            fprintf(f, "%s ", (char*) value);
             break;
         case LONG:
-            fprintf(f,"%ld", *(long *)value);
+            fprintf(f,"%ld ", *(long *)value);
+	    break;
         case DOUBLE:
-            fprintf(f,"%lf",*(double *)value);
+            fprintf(f,"%lf ",*(double *)value);
+            break;
     }
 }
 

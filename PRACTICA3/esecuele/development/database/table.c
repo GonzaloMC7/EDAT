@@ -195,7 +195,7 @@ void table_insert_record(table_t* table, void** values)
         /*Escribimos su tamano*/
         tam = value_length(table->types[i], values[i]);
 
-        fwrite(&tam, sizeof(long), 1, f);
+        fwrite(&tam, sizeof(tam), 1, f);
         /*Escribimos el dato*/
         fwrite(values[i], tam, 1, f);
     }
